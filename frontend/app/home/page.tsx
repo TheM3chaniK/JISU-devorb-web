@@ -156,7 +156,7 @@ export default function HomePage() {
                   </p>
                   <Link href={role.route}>
                     <div className={`w-full text-center py-2 rounded-lg text-white font-medium ${role.color} transition-colors cursor-pointer`}>
-                      Log In
+                      Sign In
                     </div>
                   </Link>
                 </div>
