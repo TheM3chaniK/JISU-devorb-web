@@ -1,8 +1,5 @@
-/* eslint-disable @next/next/no-img-element */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 
 // Define types for our data models
 interface ProgressReport {
@@ -10,6 +7,32 @@ interface ProgressReport {
   title: string;
   status: string;
   date: string;
+  document: string;
+}
+
+interface ResearchSubmission {
+  id: string;
+  title: string;
+  status: string;
+  date: string;
+  document: string;
+}
+
+interface DSCMember {
+  id: number;
+  name: string;
+  designation: string;
+  department: string;
+  email: string;
+}
+
+interface Form {
+  id: number;
+  title: string;
+  category: string;
+  status: string;
+  submittedDate: string;
+  document: string;
 }
 
 interface Scholar {
@@ -17,16 +40,14 @@ interface Scholar {
   name: string;
   department: string;
   enrollmentNo: string;
+  researchTopic: string;
   status: string;
+  supervisor: { name: string, email: string };
+  coSupervisor: { name: string, email: string };
+  dscMembers: DSCMember[];
   progressReports: ProgressReport[];
-}
-
-interface PendingApproval {
-  id: number;
-  scholarName: string;
-  documentType: string;
-  submittedDate: string;
-  urgency: string;
+  researchSubmissions: ResearchSubmission[];
+  forms: Form[];
 }
 
 // Mock data for assigned scholars
@@ -36,11 +57,34 @@ const mockScholars: Scholar[] = [
     name: "Rahul Sharma",
     department: "Computer Science",
     enrollmentNo: "PHD-CS-2023-001",
+    researchTopic: "Machine Learning for Cybersecurity Threat Detection",
     status: "Progress Report 3 Pending",
+    supervisor: { name: "Dr. Rajesh Gupta", email: "rajesh.gupta@jisuniversity.ac.in" },
+    coSupervisor: { name: "Dr. Preeti Mishra", email: "preeti.mishra@jisuniversity.ac.in" },
+    dscMembers: [
+      { id: 1, name: "Dr. Anil Kumar", designation: "Professor", department: "Computer Science", email: "anil.kumar@jisuniversity.ac.in" },
+      { id: 2, name: "Dr. Sneha Patel", designation: "Associate Professor", department: "Information Technology", email: "sneha.patel@jisuniversity.ac.in" },
+      { id: 3, name: "Dr. Vikram Singh", designation: "Professor", department: "Mathematics", email: "vikram.singh@jisuniversity.ac.in" }
+    ],
     progressReports: [
-      { id: 1, title: "Progress Report 1", status: "Approved", date: "15 Jan 2025" },
-      { id: 2, title: "Progress Report 2", status: "Approved", date: "20 Mar 2025" },
-      { id: 3, title: "Progress Report 3", status: "Pending Review", date: "12 May 2025" },
+      { id: 1, title: "Progress Report 1", status: "Approved", date: "15 Jan 2025", document: "report_1.pdf" },
+      { id: 2, title: "Progress Report 2", status: "Approved", date: "20 Mar 2025", document: "report_2.pdf" },
+      { id: 3, title: "Progress Report 3", status: "Pending Review", date: "12 May 2025", document: "report_3.pdf" },
+      { id: 4, title: "Progress Report 4", status: "Not Submitted", date: "", document: "" },
+      { id: 5, title: "Progress Report 5", status: "Not Submitted", date: "", document: "" },
+      { id: 6, title: "Progress Report 6", status: "Not Submitted", date: "", document: "" }
+    ],
+    researchSubmissions: [
+      { id: "rp", title: "Research Proposal", status: "Approved", date: "10 Oct 2024", document: "research_proposal.pdf" },
+      { id: "pts", title: "Pre-Thesis Submission", status: "Not Submitted", date: "", document: "" },
+      { id: "fts", title: "Final Thesis Submission", status: "Not Submitted", date: "", document: "" }
+    ],
+    forms: [
+      { id: 1, title: "Registration Form", category: "Enrollment", status: "Approved", submittedDate: "05 Sep 2024", document: "registration.pdf" },
+      { id: 2, title: "Supervisor Nomination", category: "Committee", status: "Approved", submittedDate: "20 Sep 2024", document: "supervisor_nomination.pdf" },
+      { id: 3, title: "Course Registration", category: "Coursework", status: "Approved", submittedDate: "25 Sep 2024", document: "course_registration.pdf" },
+      { id: 4, title: "DSC Formation Request", category: "Committee", status: "Approved", submittedDate: "01 Oct 2024", document: "dsc_formation.pdf" },
+      { id: 5, title: "Coursework Completion", category: "Coursework", status: "Pending Review", submittedDate: "05 May 2025", document: "coursework_completion.pdf" }
     ]
   },
   {
@@ -48,15 +92,35 @@ const mockScholars: Scholar[] = [
     name: "Priya Patel",
     department: "Electrical Engineering",
     enrollmentNo: "PHD-EE-2023-005",
+    researchTopic: "Smart Grid Optimization using AI Techniques",
     status: "Pre-submission Stage",
+    supervisor: { name: "Dr. Rajesh Gupta", email: "rajesh.gupta@jisuniversity.ac.in" },
+    coSupervisor: { name: "Dr. Harish Mehta", email: "harish.mehta@jisuniversity.ac.in" },
+    dscMembers: [
+      { id: 1, name: "Dr. Lakshmi Narayan", designation: "Professor", department: "Electrical Engineering", email: "lakshmi.narayan@jisuniversity.ac.in" },
+      { id: 2, name: "Dr. Amit Joshi", designation: "Professor", department: "Electronics", email: "amit.joshi@jisuniversity.ac.in" },
+      { id: 3, name: "Dr. Sunita Sharma", designation: "Associate Professor", department: "Computer Science", email: "sunita.sharma@jisuniversity.ac.in" }
+    ],
     progressReports: [
-      { id: 1, title: "Progress Report 1", status: "Approved", date: "10 Jan 2025" },
-      { id: 2, title: "Progress Report 2", status: "Approved", date: "05 Mar 2025" },
-      { id: 3, title: "Progress Report 3", status: "Approved", date: "08 May 2025" },
-      { id: 4, title: "Progress Report 4", status: "Approved", date: "12 Jul 2025" },
-      { id: 5, title: "Progress Report 5", status: "Approved", date: "18 Sep 2025" },
-      { id: 6, title: "Progress Report 6", status: "Approved", date: "22 Nov 2025" },
-      { id: 7, title: "Pre-submission", status: "Pending Review", date: "01 May 2025" },
+      { id: 1, title: "Progress Report 1", status: "Approved", date: "10 Jan 2025", document: "report_1.pdf" },
+      { id: 2, title: "Progress Report 2", status: "Approved", date: "05 Mar 2025", document: "report_2.pdf" },
+      { id: 3, title: "Progress Report 3", status: "Approved", date: "08 May 2025", document: "report_3.pdf" },
+      { id: 4, title: "Progress Report 4", status: "Approved", date: "12 Jul 2025", document: "report_4.pdf" },
+      { id: 5, title: "Progress Report 5", status: "Approved", date: "18 Sep 2025", document: "report_5.pdf" },
+      { id: 6, title: "Progress Report 6", status: "Approved", date: "22 Nov 2025", document: "report_6.pdf" }
+    ],
+    researchSubmissions: [
+      { id: "rp", title: "Research Proposal", status: "Approved", date: "15 Sep 2024", document: "research_proposal.pdf" },
+      { id: "pts", title: "Pre-Thesis Submission", status: "Pending Review", date: "01 May 2025", document: "pre_thesis_submission.pdf" },
+      { id: "fts", title: "Final Thesis Submission", status: "Not Submitted", date: "", document: "" }
+    ],
+    forms: [
+      { id: 1, title: "Registration Form", category: "Enrollment", status: "Approved", submittedDate: "01 Sep 2024", document: "registration.pdf" },
+      { id: 2, title: "Supervisor Nomination", category: "Committee", status: "Approved", submittedDate: "15 Sep 2024", document: "supervisor_nomination.pdf" },
+      { id: 3, title: "Course Registration", category: "Coursework", status: "Approved", submittedDate: "20 Sep 2024", document: "course_registration.pdf" },
+      { id: 4, title: "DSC Formation Request", category: "Committee", status: "Approved", submittedDate: "25 Sep 2024", document: "dsc_formation.pdf" },
+      { id: 5, title: "Coursework Completion", category: "Coursework", status: "Approved", submittedDate: "15 Jan 2025", document: "coursework_completion.pdf" },
+      { id: 6, title: "Synopsis Presentation Request", category: "Committee", status: "Approved", submittedDate: "20 Apr 2025", document: "synopsis_request.pdf" }
     ]
   },
   {
@@ -64,553 +128,799 @@ const mockScholars: Scholar[] = [
     name: "Amit Kumar",
     department: "Mathematics",
     enrollmentNo: "PHD-MTH-2024-003",
+    researchTopic: "Computational Methods for Fractional Differential Equations",
     status: "Research Proposal Pending",
+    supervisor: { name: "Dr. Rajesh Gupta", email: "rajesh.gupta@jisuniversity.ac.in" },
+    coSupervisor: { name: "Dr. Neha Agarwal", email: "neha.agarwal@jisuniversity.ac.in" },
+    dscMembers: [
+      { id: 1, name: "Dr. Rajiv Sharma", designation: "Professor", department: "Mathematics", email: "rajiv.sharma@jisuniversity.ac.in" },
+      { id: 2, name: "Dr. Meera Iyer", designation: "Associate Professor", department: "Physics", email: "meera.iyer@jisuniversity.ac.in" },
+      { id: 3, name: "Dr. Prakash Verma", designation: "Professor", department: "Statistics", email: "prakash.verma@jisuniversity.ac.in" }
+    ],
     progressReports: [
-      { id: 1, title: "Research Proposal", status: "Pending Review", date: "05 May 2025" },
+      { id: 1, title: "Progress Report 1", status: "Not Submitted", date: "", document: "" },
+      { id: 2, title: "Progress Report 2", status: "Not Submitted", date: "", document: "" },
+      { id: 3, title: "Progress Report 3", status: "Not Submitted", date: "", document: "" },
+      { id: 4, title: "Progress Report 4", status: "Not Submitted", date: "", document: "" },
+      { id: 5, title: "Progress Report 5", status: "Not Submitted", date: "", document: "" },
+      { id: 6, title: "Progress Report 6", status: "Not Submitted", date: "", document: "" }
+    ],
+    researchSubmissions: [
+      { id: "rp", title: "Research Proposal", status: "Pending Review", date: "05 May 2025", document: "research_proposal.pdf" },
+      { id: "pts", title: "Pre-Thesis Submission", status: "Not Submitted", date: "", document: "" },
+      { id: "fts", title: "Final Thesis Submission", status: "Not Submitted", date: "", document: "" }
+    ],
+    forms: [
+      { id: 1, title: "Registration Form", category: "Enrollment", status: "Approved", submittedDate: "10 Apr 2025", document: "registration.pdf" },
+      { id: 2, title: "Supervisor Nomination", category: "Committee", status: "Approved", submittedDate: "20 Apr 2025", document: "supervisor_nomination.pdf" },
+      { id: 3, title: "Course Registration", category: "Coursework", status: "Pending Review", submittedDate: "01 May 2025", document: "course_registration.pdf" },
+      { id: 4, title: "DSC Formation Request", category: "Committee", status: "Pending Review", submittedDate: "05 May 2025", document: "dsc_formation.pdf" }
     ]
   }
 ];
 
-// Mock data for pending approvals
-const mockPendingApprovals: PendingApproval[] = [
-  {
-    id: 1,
-    scholarName: "Rahul Sharma",
-    documentType: "Progress Report 3",
-    submittedDate: "12 May 2025",
-    urgency: "high"
-  },
-  {
-    id: 2,
-    scholarName: "Priya Patel",
-    documentType: "Pre-submission Write-up",
-    submittedDate: "01 May 2025",
-    urgency: "medium"
-  },
-  {
-    id: 3,
-    scholarName: "Amit Kumar",
-    documentType: "Research Proposal",
-    submittedDate: "05 May 2025",
-    urgency: "high"
-  }
-];
-
-export default function CoSupervisorDashboard() {
+export default function SupervisorDashboard() {
   const [mounted, setMounted] = useState(false);
-  const [activeTab, setActiveTab] = useState('scholars');
   const [selectedScholar, setSelectedScholar] = useState<Scholar | null>(null);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [showModal, setShowModal] = useState(false);
+  const [modalContent, setModalContent] = useState({
+    title: '',
+    document: '',
+    type: '',
+    id: 0,
+    action: ''
+  });
+  const [remark, setRemark] = useState('');
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Animation variants
-  const itemVariant = {
-    hidden: { y: 20, opacity: 0 },
-    show: { y: 0, opacity: 1 }
-  };
-
   if (!mounted) return null;
 
   const handleScholarSelect = (scholar: Scholar) => {
     setSelectedScholar(scholar);
-    setActiveTab('scholarDetails');
+    setActiveTab('overview');
   };
 
-  const renderDashboardContent = () => {
-    switch (activeTab) {
-      case 'scholars':
-        return (
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Assigned Ph.D. Scholars</h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enrollment No.</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {mockScholars.map((scholar) => (
-                    <tr key={scholar.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-gray-900">{scholar.name}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {scholar.department}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {scholar.enrollmentNo}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          scholar.status.includes('Pending') ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
-                        }`}>
-                          {scholar.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <button 
-                          onClick={() => handleScholarSelect(scholar)}
-                          className="text-indigo-600 hover:text-indigo-900 font-medium"
-                        >
-                          View Details
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        );
+  const handleBackToList = () => {
+    setSelectedScholar(null);
+  };
 
-      case 'approvals':
-        return (
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Pending Approvals</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockPendingApprovals.map((approval) => (
-                <div 
-                  key={approval.id} 
-                  className={`border ${
-                    approval.urgency === 'high' ? 'border-red-200 bg-red-50' : 
-                    approval.urgency === 'medium' ? 'border-yellow-200 bg-yellow-50' : 
-                    'border-blue-200 bg-blue-50'
-                  } rounded-lg p-4 shadow-sm`}
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-semibold text-gray-800">{approval.documentType}</h4>
-                      <p className="text-sm text-gray-600">Scholar: {approval.scholarName}</p>
-                      <p className="text-xs text-gray-500 mt-1">Submitted: {approval.submittedDate}</p>
-                    </div>
-                    {approval.urgency === 'high' && (
-                      <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full font-medium">Urgent</span>
-                    )}
-                  </div>
-                  <div className="mt-4 flex gap-2">
-                    <button className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-3 py-1 rounded-md transition-colors">
-                      Review
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
+  const handleOpenModal = (title: string, document: string, type: string, id: number, action: string) => {
+    setModalContent({ title, document, type, id, action });
+    setShowModal(true);
+  };
 
-      case 'repository':
-        return (
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Approved Documents Repository</h3>
-            <div className="mb-4">
-              <input 
-                type="text" 
-                placeholder="Search documents..." 
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-            
-            <div className="flex flex-col space-y-4">
-              <div className="border-b pb-2">
-                <h4 className="font-medium text-gray-700">Research Proposals</h4>
-                <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
-                  <div className="flex items-center p-2 border rounded-md hover:bg-gray-50">
-                    <svg className="h-5 w-5 text-gray-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path>
-                    </svg>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium">ML-Based Fraud Detection</div>
-                      <div className="text-xs text-gray-500">Rahul Sharma - Approved on 10 Dec 2024</div>
-                    </div>
-                    <button className="text-indigo-600 hover:text-indigo-800 p-1">
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                    </button>
-                  </div>
-                  <div className="flex items-center p-2 border rounded-md hover:bg-gray-50">
-                    <svg className="h-5 w-5 text-gray-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path>
-                    </svg>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium">Smart Grid Optimization</div>
-                      <div className="text-xs text-gray-500">Priya Patel - Approved on 05 Nov 2024</div>
-                    </div>
-                    <button className="text-indigo-600 hover:text-indigo-800 p-1">
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setRemark('');
+  };
 
-              <div className="border-b pb-2">
-                <h4 className="font-medium text-gray-700">Progress Reports</h4>
-                <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {[1, 2, 3, 4].map((num) => (
-                    <div key={num} className="flex items-center p-2 border rounded-md hover:bg-gray-50">
-                      <svg className="h-5 w-5 text-gray-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path>
-                      </svg>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium">Progress Report {num} - Priya Patel</div>
-                        <div className="text-xs text-gray-500">Approved on {num * 2} {num % 2 === 0 ? 'Mar' : 'Apr'} 2025</div>
-                      </div>
-                      <button className="text-indigo-600 hover:text-indigo-800 p-1">
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+  const handleAction = () => {
+    // Here we would implement the actual approval/disapproval logic
+    // For now, we just close the modal
+    handleCloseModal();
+  };
 
-              <div>
-                <h4 className="font-medium text-gray-700">Pre-submission & Thesis</h4>
-                <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
-                  <div className="flex items-center p-2 border rounded-md hover:bg-gray-50">
-                    <svg className="h-5 w-5 text-gray-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path>
-                    </svg>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium">Pre-submission Write-up</div>
-                      <div className="text-xs text-gray-500">Suresh Das - Approved on 15 Jan 2025</div>
-                    </div>
-                    <button className="text-indigo-600 hover:text-indigo-800 p-1">
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-
-      case 'scholarDetails':
-        if (!selectedScholar) return null;
-        
-        return (
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-gray-800">Scholar Details</h3>
-              <button 
-                onClick={() => setActiveTab('scholars')} 
-                className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center"
-              >
-                <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Back to List
-              </button>
-            </div>
-
-            <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-4 mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Name</p>
-                  <p className="font-medium">{selectedScholar.name}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Department</p>
-                  <p className="font-medium">{selectedScholar.department}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Enrollment Number</p>
-                  <p className="font-medium">{selectedScholar.enrollmentNo}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Current Status</p>
-                  <p className="font-medium">{selectedScholar.status}</p>
-                </div>
-              </div>
-            </div>
-
-            <h4 className="font-semibold text-gray-700 mb-3">Progress Reports & Submissions</h4>
-            <div className="space-y-4">
-              {selectedScholar.progressReports.map((report) => (
-                <div key={report.id} className="flex items-center border-b pb-3">
-                  <div className={`h-8 w-8 rounded-full flex items-center justify-center mr-3 ${
-                    report.status === 'Approved' 
-                      ? 'bg-green-100 text-green-600' 
-                      : report.status === 'Pending Review'
-                      ? 'bg-yellow-100 text-yellow-600'
-                      : 'bg-red-100 text-red-600'
+  const renderScholarTable = () => (
+    <div className="bg-white rounded-xl shadow-lg p-6">
+      <h3 className="text-xl font-semibold text-gray-800 mb-4">Assigned Ph.D. Scholars</h3>
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enrollment No.</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {mockScholars.map((scholar) => (
+              <tr key={scholar.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="font-medium text-gray-900">{scholar.name}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {scholar.department}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {scholar.enrollmentNo}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    scholar.status.includes('Pending') ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
                   }`}>
-                    {report.status === 'Approved' ? (
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    ) : report.status === 'Pending Review' ? (
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    ) : (
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between">
-                      <div>
-                        <p className="font-medium">{report.title}</p>
-                        <p className="text-xs text-gray-500">Submitted: {report.date}</p>
-                      </div>
-                      <div>
-                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                          report.status === 'Approved' 
-                            ? 'bg-green-100 text-green-800' 
-                            : report.status === 'Pending Review'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {report.status}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {report.status === 'Pending Review' && (
-                    <div className="ml-4 flex gap-2">
-                      <button className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1 rounded transition-colors">
-                        Review
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {selectedScholar.progressReports.some(r => r.status === 'Pending Review') && (
-              <div className="mt-6 bg-yellow-50 border border-yellow-100 rounded-lg p-4">
-                <h4 className="font-medium text-yellow-800 mb-2">Actions Required</h4>
-                <ul className="list-disc list-inside text-sm text-yellow-700">
-                  {selectedScholar.progressReports
-                    .filter(r => r.status === 'Pending Review')
-                    .map(report => (
-                      <li key={report.id}>Review and approve {report.title}</li>
-                    ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  const renderNotifications = () => (
-    <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-      <h3 className="text-lg font-semibold text-gray-800 mb-3">Notifications</h3>
-      <div className="space-y-3">
-        <div className="flex items-start gap-3 p-2 border-b">
-          <div className="h-8 w-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-            <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <div>
-            <p className="text-sm font-medium">Urgent: 3 submissions awaiting your review</p>
-            <p className="text-xs text-gray-500">Today</p>
-          </div>
-        </div>
-        
-        <div className="flex items-start gap-3 p-2 border-b">
-          <div className="h-8 w-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
-            <svg className="h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <div>
-            <p className="text-sm font-medium">Supervisor approved Progress Report 4 for Rahul Sharma</p>
-            <p className="text-xs text-gray-500">Yesterday</p>
-          </div>
-        </div>
-        
-        <div className="flex items-start gap-3 p-2">
-          <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-            <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <div>
-            <p className="text-sm font-medium">New document submitted by Amit Kumar</p>
-            <p className="text-xs text-gray-500">2 days ago</p>
-          </div>
-        </div>
+                    {scholar.status}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <button 
+                    onClick={() => handleScholarSelect(scholar)}
+                    className="text-indigo-600 hover:text-indigo-900 font-medium"
+                  >
+                    View Details
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-      
-      <button className="mt-3 text-indigo-600 hover:text-indigo-800 text-sm font-medium">
-        View all notifications
-      </button>
     </div>
   );
 
+  const renderScholarDetails = () => {
+    if (!selectedScholar) return null;
 
-  const renderStats = () => (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-      <div className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-indigo-500">
-        <p className="text-sm text-gray-500">Assigned Scholars</p>
-        <p className="text-2xl font-bold text-gray-800">8</p>
+    const renderTabs = () => (
+      <div className="flex border-b mb-4">
+        <button 
+          onClick={() => setActiveTab('overview')} 
+          className={`px-4 py-2 font-medium ${activeTab === 'overview' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
+        >
+          Overview
+        </button>
+        <button 
+          onClick={() => setActiveTab('submissions')} 
+          className={`px-4 py-2 font-medium ${activeTab === 'submissions' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
+        >
+          Submissions
+        </button>
+        <button 
+          onClick={() => setActiveTab('forms')} 
+          className={`px-4 py-2 font-medium ${activeTab === 'forms' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
+        >
+          Forms
+        </button>
       </div>
-      <div className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-yellow-500">
-        <p className="text-sm text-gray-500">Pending Approvals</p>
-        <p className="text-2xl font-bold text-gray-800">3</p>
+    );
+
+    const renderOverview = () => (
+      <div className="space-y-6">
+        <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-4">
+          <h4 className="text-lg font-semibold text-gray-800 mb-3">Scholar Information</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-gray-500">Name</p>
+              <p className="font-medium text-black">{selectedScholar.name}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Department</p>
+              <p className="font-medium text-black">{selectedScholar.department}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Enrollment Number</p>
+              <p className="font-medium text-black">{selectedScholar.enrollmentNo}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Current Status</p>
+              <p className="font-medium text-black">{selectedScholar.status}</p>
+            </div>
+            <div className="md:col-span-2">
+              <p className="text-sm text-gray-500">Research Topic</p>
+              <p className="font-medium text-black">{selectedScholar.researchTopic}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <h4 className="text-md font-semibold text-gray-800 mb-3">Supervisor Information</h4>
+            <div>
+              <p className="text-sm text-gray-500">Name</p>
+              <p className="font-medium text-black">{selectedScholar.supervisor.name}</p>
+            </div>
+            <div className="mt-2">
+              <p className="text-sm text-gray-500">Email</p>
+              <p className="font-medium text-black">{selectedScholar.supervisor.email}</p>
+            </div>
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <h4 className="text-md font-semibold text-gray-800 mb-3">Co-Supervisor Information</h4>
+            <div>
+              <p className="text-sm text-gray-500">Name</p>
+              <p className="font-medium text-black">{selectedScholar.coSupervisor.name}</p>
+            </div>
+            <div className="mt-2">
+              <p className="text-sm text-gray-500">Email</p>
+              <p className="font-medium text-black">{selectedScholar.coSupervisor.email}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <h4 className="text-md font-semibold text-gray-800 mb-3">Doctoral Scrutiny Committee (DSC)</h4>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Designation</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {selectedScholar.dscMembers.map((member) => (
+                  <tr key={member.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="font-medium text-gray-900">{member.name}</div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                      {member.designation}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                      {member.department}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                      {member.email}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-      <div className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-blue-500">
-        <p className="text-sm text-gray-500">Pre-submission Stage</p>
-        <p className="text-2xl font-bold text-gray-800">1</p>
+    );
+
+    const renderSubmissions = () => (
+      <div className="space-y-6">
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <h4 className="text-md font-semibold text-gray-800 mb-3">Research Proposal</h4>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submission Date</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {selectedScholar.researchSubmissions
+                  .filter(submission => submission.id === "rp")
+                  .map((submission) => (
+                    <tr key={submission.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="font-medium text-gray-900">{submission.title}</div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          submission.status === 'Approved' ? 'bg-green-100 text-green-800' : 
+                          submission.status === 'Pending Review' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {submission.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {submission.date || 'N/A'}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {submission.status !== 'Not Submitted' && (
+                          <div className="flex space-x-2">
+                            <button 
+                              className="text-blue-600 hover:text-blue-900"
+                              onClick={() => handleOpenModal(submission.title, submission.document, 'research', 0, 'view')}
+                            >
+                              View
+                            </button>
+                            {submission.status === 'Pending Review' && (
+                              <>
+                                <button 
+                                  className="text-green-600 hover:text-green-900"
+                                  onClick={() => handleOpenModal(submission.title, submission.document, 'research', 0, 'approve')}
+                                >
+                                  Approve
+                                </button>
+                                <button 
+                                  className="text-red-600 hover:text-red-900"
+                                  onClick={() => handleOpenModal(submission.title, submission.document, 'research', 0, 'disapprove')}
+                                >
+                                  Disapprove
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <h4 className="text-md font-semibold text-gray-800 mb-3">Progress Reports</h4>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submission Date</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {selectedScholar.progressReports.map((report) => (
+                  <tr key={report.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="font-medium text-gray-900">{report.title}</div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        report.status === 'Approved' ? 'bg-green-100 text-green-800' : 
+                        report.status === 'Pending Review' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {report.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                      {report.date || 'N/A'}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                      {report.status !== 'Not Submitted' && (
+                        <div className="flex space-x-2">
+                          <button 
+                            className="text-blue-600 hover:text-blue-900"
+                            onClick={() => handleOpenModal(report.title, report.document, 'progress', report.id, 'view')}
+                          >
+                            View
+                          </button>
+                          {report.status === 'Pending Review' && (
+                            <>
+                              <button 
+                                className="text-green-600 hover:text-green-900"
+                                onClick={() => handleOpenModal(report.title, report.document, 'progress', report.id, 'approve')}
+                              >
+                                Approve
+                              </button>
+                              <button 
+                                className="text-red-600 hover:text-red-900"
+                                onClick={() => handleOpenModal(report.title, report.document, 'progress', report.id, 'disapprove')}
+                              >
+                                Disapprove
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <h4 className="text-md font-semibold text-gray-800 mb-3">Pre-submission and Final Thesis</h4>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submission Date</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {selectedScholar.researchSubmissions
+                  .filter(submission => submission.id === "pts" || submission.id === "fts")
+                  .map((submission) => (
+                    <tr key={submission.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="font-medium text-gray-900">{submission.title}</div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          submission.status === 'Approved' ? 'bg-green-100 text-green-800' : 
+                          submission.status === 'Pending Review' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {submission.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {submission.date || 'N/A'}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {submission.status !== 'Not Submitted' && (
+                          <div className="flex space-x-2">
+                            <button 
+                              className="text-blue-600 hover:text-blue-900"
+                              onClick={() => handleOpenModal(submission.title, submission.document, 'thesis', 0, 'view')}
+                            >
+                              View
+                            </button>
+                            {submission.status === 'Pending Review' && (
+                              <>
+                                <button 
+                                  className="text-green-600 hover:text-green-900"
+                                  onClick={() => handleOpenModal(submission.title, submission.document, 'thesis', 0, 'approve')}
+                                >
+                                  Approve
+                                </button>
+                                <button 
+                                  className="text-red-600 hover:text-red-900"
+                                  onClick={() => handleOpenModal(submission.title, submission.document, 'thesis', 0, 'disapprove')}
+                                >
+                                  Disapprove
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-      <div className="bg-white rounded-xl shadow-sm p-4 border-l-4 border-purple-500">
-        <p className="text-sm text-gray-500">Approved Documents</p>
-        <p className="text-2xl font-bold text-gray-800">12</p>
+    );
+
+    const renderForms = () => (
+      <div className="space-y-6">
+        {/* Admission and Enrollment Documents */}
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <h4 className="text-md font-semibold text-gray-800 mb-3">Admission and Enrollment Documents</h4>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submission Date</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {selectedScholar.forms
+                  .filter(form => form.category === 'Enrollment')
+                  .map((form) => (
+                    <tr key={form.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="font-medium text-gray-900">{form.title}</div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          form.status === 'Approved' ? 'bg-green-100 text-green-800' : 
+                          form.status === 'Pending Review' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {form.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {form.submittedDate || 'N/A'}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        <div className="flex space-x-2">
+                          <button 
+                            className="text-blue-600 hover:text-blue-900"
+                            onClick={() => handleOpenModal(form.title, form.document, 'form', form.id, 'view')}
+                          >
+                            View
+                          </button>
+                          {form.status === 'Pending Review' && (
+                            <>
+                              <button 
+                                className="text-green-600 hover:text-green-900"
+                                onClick={() => handleOpenModal(form.title, form.document, 'form', form.id, 'approve')}
+                              >
+                                Approve
+                              </button>
+                              <button 
+                                className="text-red-600 hover:text-red-900"
+                                onClick={() => handleOpenModal(form.title, form.document, 'form', form.id, 'disapprove')}
+                              >
+                                Disapprove
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Supervisor and Committee Formation Documents */}
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <h4 className="text-md font-semibold text-gray-800 mb-3">Supervisor and Committee Formation Documents</h4>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submission Date</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {selectedScholar.forms
+                  .filter(form => form.category === 'Committee')
+                  .map((form) => (
+                    <tr key={form.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="font-medium text-gray-900">{form.title}</div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          form.status === 'Approved' ? 'bg-green-100 text-green-800' : 
+                          form.status === 'Pending Review' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {form.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {form.submittedDate || 'N/A'}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        <div className="flex space-x-2">
+                          <button 
+                            className="text-blue-600 hover:text-blue-900"
+                            onClick={() => handleOpenModal(form.title, form.document, 'form', form.id, 'view')}
+                          >
+                            View
+                          </button>
+                          {form.status === 'Pending Review' && (
+                            <>
+                              <button 
+                                className="text-green-600 hover:text-green-900"
+                                onClick={() => handleOpenModal(form.title, form.document, 'form', form.id, 'approve')}
+                              >
+                                Approve
+                              </button>
+                              <button 
+                                className="text-red-600 hover:text-red-900"
+                                onClick={() => handleOpenModal(form.title, form.document, 'form', form.id, 'disapprove')}
+                              >
+                                Disapprove
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Coursework and Registration Documents */}
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <h4 className="text-md font-semibold text-gray-800 mb-3">Coursework and Registration Documents</h4>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submission Date</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {selectedScholar.forms
+                  .filter(form => form.category === 'Coursework')
+                  .map((form) => (
+                    <tr key={form.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="font-medium text-gray-900">{form.title}</div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          form.status === 'Approved' ? 'bg-green-100 text-green-800' : 
+                          form.status === 'Pending Review' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {form.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {form.submittedDate || 'N/A'}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        <div className="flex space-x-2">
+                          <button 
+                            className="text-blue-600 hover:text-blue-900"
+                            onClick={() => handleOpenModal(form.title, form.document, 'form', form.id, 'view')}
+                          >
+                            View
+                          </button>
+                          {form.status === 'Pending Review' && (
+                            <>
+                              <button 
+                                className="text-green-600 hover:text-green-900"
+                                onClick={() => handleOpenModal(form.title, form.document, 'form', form.id, 'approve')}
+                              >
+                                Approve
+                              </button>
+                              <button 
+                                className="text-red-600 hover:text-red-900"
+                                onClick={() => handleOpenModal(form.title, form.document, 'form', form.id, 'disapprove')}
+                              >
+                                Disapprove
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-    </div>
+    );
+
+    return (
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center">
+            <button 
+              onClick={handleBackToList}
+              className="text-indigo-600 hover:text-indigo-900 mr-3"
+            >
+              ← Back to List
+            </button>
+            <h3 className="text-xl font-semibold text-gray-800">{selectedScholar.name}</h3>
+          </div>
+          <span className={`px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full ${
+            selectedScholar.status.includes('Pending') ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+          }`}>
+            {selectedScholar.status}
+          </span>
+        </div>
+        
+        {renderTabs()}
+        
+        {activeTab === 'overview' && renderOverview()}
+        {activeTab === 'submissions' && renderSubmissions()}
+        {activeTab === 'forms' && renderForms()}
+      </div>
+    );
+  };
+
+  // Render modal for actions
+  const renderModal = () => (
+    showModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-xl shadow-xl p-6 max-w-2xl w-full max-h-full overflow-y-auto">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-gray-800">
+              {modalContent.action === 'view' ? 'View Document' : 
+               modalContent.action === 'approve' ? 'Approve Document' : 'Disapprove Document'}
+            </h3>
+            <button 
+              onClick={handleCloseModal}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          <div className="mb-4">
+            <p className="font-medium text-gray-800">{modalContent.title}</p>
+            <p className="text-sm text-gray-500">Document: {modalContent.document}</p>
+          </div>
+          
+          {modalContent.action !== 'view' && (
+            <div className="mb-4">
+              <label htmlFor="remark" className="block text-sm font-medium text-gray-700 mb-1">
+                Add Remark
+              </label>
+              <textarea
+                id="remark"
+                value={remark}
+                onChange={(e) => setRemark(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                rows={4}
+                placeholder="Add your comments or feedback here..."
+              ></textarea>
+            </div>
+          )}
+          
+          <div className="flex justify-end space-x-3">
+            <button
+              onClick={handleCloseModal}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            {modalContent.action !== 'view' && (
+              <button
+                onClick={handleAction}
+                className={`px-4 py-2 rounded-md text-white ${
+                  modalContent.action === 'approve' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-red-600 hover:bg-red-700'
+                }`}
+              >
+                {modalContent.action === 'approve' ? 'Approve' : 'Disapprove'}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  );
+
+  // Render footer
+  const renderFooter = () => (
+    <footer className="bg-gray-100 py-4 mt-8">
+      <div className="container mx-auto px-4">
+        <div className="flex flex-col sm:flex-row justify-between items-center">
+          <p className="text-gray-600 text-sm mb-2 sm:mb-0">© 2025 JIS University. All Rights Reserved.</p>
+          <div className="flex space-x-4">
+            <a href="#" className="text-indigo-600 hover:text-indigo-800 text-sm">Help Center</a>
+            <a href="#" className="text-indigo-600 hover:text-indigo-800 text-sm">Terms and Conditions</a>
+            <a href="#" className="text-indigo-600 hover:text-indigo-800 text-sm">Privacy Policy</a>
+          </div>
+        </div>
+      </div>
+    </footer>
   );
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="bg-indigo-700 text-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">Co-Supervisor Dashboard</h1>
+            <h1 className="text-2xl font-bold text-indigo-600">Co Supervisor Dashboard</h1>
             <div className="flex items-center space-x-4">
-              <div className="relative">
-                <button className="p-1 rounded-full hover:bg-indigo-600 focus:outline-none">
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                  </svg>
-                </button>
-                <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
-              </div>
-              <div className="flex items-center">
-                <img className="h-8 w-8 rounded-full" src="/api/placeholder/32/32" alt="User" />
-                <span className="ml-2 font-medium">Dr. Jane Smith</span>
-              </div>
+              <span className="text-gray-700">Dr. Rajesh Gupta</span>
+              <button className="bg-indigo-100 text-indigo-800 p-2 rounded-full">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      </header>
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          {renderStats()}
-          
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-              {renderDashboardContent()}
-            </div>
-            <div className="lg:col-span-1">
-              {renderNotifications()}
-              
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">Upcoming Deadlines</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-red-50 border border-red-100 rounded-lg">
-                    <div className="flex items-center">
-                      <div className="h-8 w-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                        <svg className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">Progress Report Review</p>
-                        <p className="text-xs text-gray-500">Rahul Sharma</p>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-red-600">Today</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-100 rounded-lg">
-                    <div className="flex items-center">
-                      <div className="h-8 w-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
-                        <svg className="h-4 w-4 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">Research Proposal Review</p>
-                        <p className="text-xs text-gray-500">Amit Kumar</p>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-yellow-600">3 days</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-100 rounded-lg">
-                    <div className="flex items-center">
-                      <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                        <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">Pre-submission Review</p>
-                        <p className="text-xs text-gray-500">Priya Patel</p>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-blue-600">5 days</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-6">
+        {selectedScholar ? renderScholarDetails() : renderScholarTable()}
+        <div className="mt-6">
       </div>
+      </main>
       
-      <nav className="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 z-10 md:hidden">
-        <div className="grid grid-cols-3 h-16">
-          <button 
-            onClick={() => setActiveTab('scholars')}
-            className={`flex flex-col items-center justify-center ${activeTab === 'scholars' ? 'text-indigo-600' : 'text-gray-500'}`}
-          >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            <span className="text-xs mt-1">Scholars</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('approvals')}
-            className={`flex flex-col items-center justify-center ${activeTab === 'approvals' ? 'text-indigo-600' : 'text-gray-500'}`}
-          >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="text-xs mt-1">Approvals</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('repository')}
-            className={`flex flex-col items-center justify-center ${activeTab === 'repository' ? 'text-indigo-600' : 'text-gray-500'}`}
-          >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-            </svg>
-            <span className="text-xs mt-1">Repository</span>
-          </button>
-        </div>
-      </nav>
+      {/* Footer */}
+      {renderFooter()}
+      
+      {/* Modal */}
+      {renderModal()}
     </div>
   );
 }
+
+// push to dsc for evalution is not establish we can make a logic that if
+// approved by the supervisor and co-supervisor then it will be pushed to dsc for evaluation automatically
