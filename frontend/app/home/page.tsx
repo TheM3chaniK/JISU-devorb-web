@@ -103,7 +103,7 @@ export default function HomePage() {
             transition={{ duration: 0.5 }}
           >
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Ph.D. Approval Based Management System
+              Ph.D. Program Management System
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
               A comprehensive platform for streamlined management of doctoral research journeys
