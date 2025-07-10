@@ -3,8 +3,7 @@ import { Router } from "express";
 
 const router = Router();
 
-router.get("/get-profile", getStdProfile);
-
+router.get("/profile", getStdProfile);
 
 
 export default router;
