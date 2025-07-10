@@ -13,9 +13,9 @@ export interface ProgressReport {
   id: number;
   reportNumber: number;
   title: string;
-  submittedOn?: string;
+  submittedOn: string;
   status: ProgressReportStatus;
-  filename?: string;
+  filename: string;
 }
 
 export interface Form {
