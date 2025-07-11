@@ -4,10 +4,19 @@ export enum DocType {
 }
 
 export enum ProgressReportStatus {
-  Approved = "Approved",
-  PendingSupervisorApproval = "Pending Supervisor Approval",
-  NotStarted = "Not Started"
+  Approved = 0,
+  PendingSupervisorApproval = 1,
+  rejected = 2,
+  NotStarted = 3,
 }
+
+export const ProrgressReportStatusHumanReadable = {
+  [ProgressReportStatus.Approved]: "Approved",
+  [ProgressReportStatus.PendingSupervisorApproval]:
+    "Pending Supervisor Approval",
+  [ProgressReportStatus.rejected]: "Rejected",
+  [ProgressReportStatus.NotStarted]: "Not Started",
+};
 
 export interface ProgressReport {
   id: number;
@@ -20,11 +29,7 @@ export interface ProgressReport {
 
 export interface Form {
   id: string;
-  name: string;            
-  type: string;           
-  filename: string;      
+  name: string;
+  type: string;
+  filename: string;
 }
-
-
-
-

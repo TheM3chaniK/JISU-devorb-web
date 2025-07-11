@@ -16,7 +16,7 @@ const ProgressReports: React.FC = () => {
 
         for (let i = 1; i <= 6; i++) {
           const found = reportsArray.find(
-            (r: ProgressReport) => r.reportNumber === i
+            (r: ProgressReport) => r.reportNumber === i,
           );
 
           if (found) {
@@ -41,7 +41,7 @@ const ProgressReports: React.FC = () => {
   const handleUpload = async (reportNumber: number) => {
     const input = document.createElement("input");
     input.type = "file";
-    input.multiple = false; // ✅ single file only
+    input.multiple = false;
 
     input.onchange = async (event: any) => {
       const files = event.target.files;
@@ -49,13 +49,16 @@ const ProgressReports: React.FC = () => {
 
       const formData = new FormData();
       formData.append("reportNumber", reportNumber.toString());
-      formData.append("report", files[0]); // ✅ MUST MATCH .single("report")
+      formData.append("report", files[0]);
 
       try {
-        const res = await fetch("http://localhost:5000/api/docs/progress-reports/", {
-          method: "POST",
-          body: formData,
-        });
+        const res = await fetch(
+          "http://localhost:5000/api/docs/progress-reports/",
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
 
         if (!res.ok) {
           console.error("Upload failed:", res.statusText);
@@ -94,7 +97,8 @@ const ProgressReports: React.FC = () => {
             </div>
             <div className="flex items-center space-x-3 mt-2 sm:mt-0">
               <StatusBadge status={report.status} />
-              {report.status === ProgressReportStatus.NotStarted ? (
+              {report.status === ProgressReportStatus.NotStarted ||
+              ProgressReportStatus.Rejected ? (
                 <button
                   className="bg-blue-600 text-white text-xs font-medium py-1 px-3 rounded hover:bg-blue-700 transition"
                   onClick={() => handleUpload(report.reportNumber)}
@@ -120,4 +124,3 @@ const ProgressReports: React.FC = () => {
 };
 
 export default ProgressReports;
-

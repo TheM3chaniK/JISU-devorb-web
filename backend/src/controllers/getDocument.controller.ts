@@ -1,19 +1,23 @@
 import { Request, Response } from "express";
 import path from "path";
 import { forms, progressReports } from "@/test-data/forms.js";
+import { ProrgressReportStatusHumanReadable } from "@/types/Document.js";
 
 export const getForms = (req: Request, res: Response) => {
   return res.status(200).json({ forms });
 };
 
 export const getProgressReports = (req: Request, res: Response) => {
-  return res.status(200).json({ progressReports });
+  const _progressReports = progressReports.map((e) => {
+    return { ...e, status: ProrgressReportStatusHumanReadable[e.status] };
+  });
+  return res.status(200).json({ progressReports: [..._progressReports] });
 };
 
 export const downloadForm = (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const form = forms.find(f => f.id === id);
+  const form = forms.find((f) => f.id === id);
   if (!form) {
     return res.status(404).json({ message: "Form not found" });
   }
@@ -38,13 +42,15 @@ export const downloadForm = (req: Request, res: Response) => {
 export const viewProgressReport = (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const report = progressReports.find(r => r.id === Number(id));
+  const report = progressReports.find((r) => r.id === Number(id));
   if (!report) {
     return res.status(404).json({ message: "Progress Report not found" });
   }
 
   if (!report.filename) {
-    return res.status(404).json({ message: "Progress Report file not available" });
+    return res
+      .status(404)
+      .json({ message: "Progress Report file not available" });
   }
 
   const baseURI = process.env.PROGRESS_REPORT_BASE_URI;
@@ -59,4 +65,3 @@ export const viewProgressReport = (req: Request, res: Response) => {
     }
   });
 };
-
