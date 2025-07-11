@@ -6,7 +6,8 @@ export enum DocType {
 export enum ProgressReportStatus {
   Approved = "Approved",
   PendingSupervisorApproval = "Pending Supervisor Approval",
-  NotStarted = "Not Started"
+  Rejected = "Rejected",
+  NotStarted = "Not Started",
 }
 
 export interface ProgressReport {
@@ -20,12 +21,7 @@ export interface ProgressReport {
 
 export interface Form {
   id: string;
-  name: string;            
-  type: string;           
-  filename: string;      
+  name: string;
+  type: string;
+  filename: string;
 }
-
-
-
-
-
