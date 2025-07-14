@@ -1,14 +1,19 @@
 import { Request, Response } from "express";
 import path from "path";
-import { forms, progressReports } from "@/test-data/forms.js";
+import { forms } from "@/test-data/forms.js";
 import { ProrgressReportStatusHumanReadable } from "@/types/Document.js";
+import { AcademicProfiles } from "@/test-data/phdscoller.js";
 
 export const getForms = (req: Request, res: Response) => {
   return res.status(200).json({ forms });
 };
 
 export const getProgressReports = (req: Request, res: Response) => {
-  const _progressReports = progressReports.map((e) => {
+  // const { id } = req.query;
+  // const academicProfile = AcademicProfiles.find((e) => e.id === Number(id));
+  // if (!academicProfile)
+    // return res.status(404).json({ message: "Can't Find Scholar with this id" });
+  const _progressReports = AcademicProfiles[0].progressReports.map((e) => {
     return { ...e, status: ProrgressReportStatusHumanReadable[e.status] };
   });
   return res.status(200).json({ progressReports: [..._progressReports] });
@@ -41,8 +46,9 @@ export const downloadForm = (req: Request, res: Response) => {
 
 export const viewProgressReport = (req: Request, res: Response) => {
   const { id } = req.params;
-
-  const report = progressReports.find((r) => r.id === Number(id));
+  const report = AcademicProfiles[0].progressReports.find(
+    (r) => r.id === Number(id),
+  );
   if (!report) {
     return res.status(404).json({ message: "Progress Report not found" });
   }

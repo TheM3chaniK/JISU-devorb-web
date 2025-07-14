@@ -1,16 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface Scholar {
   id: number;
   name: string;
   department: string;
-  enrollmentNo: string;
+  enrollmentId: string;
   status: string;
 }
 
-export default function AssignedScholarsTable() {
+interface AssignedScholarsTableProp {
+  setSelectedScholar: React.Dispatch<React.SetStateAction<Scholar | null>>;
+}
+
+const AssignedScholarsTable: React.FC<AssignedScholarsTableProp> = () => {
   const [scholars, setScholars] = useState<Scholar[]>([]);
 
   useEffect(() => {
@@ -21,7 +25,6 @@ export default function AssignedScholarsTable() {
         const data = await res.json();
         console.log("API response:", data);
 
-        // ✅ Handles both: wrapped or direct array
         if (Array.isArray(data)) {
           setScholars(data);
         } else if (Array.isArray(data.assignedScholars)) {
@@ -80,7 +83,7 @@ export default function AssignedScholarsTable() {
                   {scholar.department}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {scholar.enrollmentNo}
+                  {scholar.enrollmentId}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
@@ -106,7 +109,10 @@ export default function AssignedScholarsTable() {
 
             {scholars.length === 0 && (
               <tr>
-                <td colSpan={5} className="text-center text-gray-500 py-4 text-sm">
+                <td
+                  colSpan={5}
+                  className="text-center text-gray-500 py-4 text-sm"
+                >
                   No scholars assigned.
                 </td>
               </tr>
@@ -116,5 +122,6 @@ export default function AssignedScholarsTable() {
       </div>
     </div>
   );
-}
+};
 
+export default AssignedScholarsTable;

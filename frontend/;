@@ -1,12 +1,507 @@
 "use client";
 import { useState, useEffect } from "react";
 import DSCSubmissions from "../components/DSCSubmissions";
-import AssignedScholarsTable from "./AsignedScholarTable";
-import ScholarOverview from "./ScholarOverview";
-import { Scholar } from "../types/Scholar";
+import AssignedScholarsTable from "./AsignScholarTable";
+
+// Define types for our data models
+interface ProgressReport {
+  id: number;
+  title: string;
+  status: string;
+  date: string;
+  document: string;
+}
+
+interface ResearchSubmission {
+  id: string;
+  title: string;
+  status: string;
+  date: string;
+  document: string;
+}
+
+interface DSCMember {
+  id: number;
+  name: string;
+  designation: string;
+  department: string;
+  email: string;
+}
+
+interface Form {
+  id: number;
+  title: string;
+  category: string;
+  status: string;
+  submittedDate: string;
+  document: string;
+}
+
+interface Scholar {
+  id: number;
+  name: string;
+  department: string;
+  enrollmentNo: string;
+  researchTopic: string;
+  status: string;
+  supervisor: { name: string; email: string };
+  coSupervisor: { name: string; email: string };
+  dscMembers: DSCMember[];
+  progressReports: ProgressReport[];
+  researchSubmissions: ResearchSubmission[];
+  forms: Form[];
+}
+
+// Mock data for assigned scholars
+const mockScholars: Scholar[] = [
+  {
+    id: 1,
+    name: "Rahul Sharma",
+    department: "Computer Science",
+    enrollmentNo: "PHD-CS-2023-001",
+    researchTopic: "Machine Learning for Cybersecurity Threat Detection",
+    status: "Progress Report 3 Pending",
+    supervisor: {
+      name: "Dr. Rajesh Gupta",
+      email: "rajesh.gupta@jisuniversity.ac.in",
+    },
+    coSupervisor: {
+      name: "Dr. Preeti Mishra",
+      email: "preeti.mishra@jisuniversity.ac.in",
+    },
+    dscMembers: [
+      {
+        id: 1,
+        name: "Dr. Anil Kumar",
+        designation: "Professor",
+        department: "Computer Science",
+        email: "anil.kumar@jisuniversity.ac.in",
+      },
+      {
+        id: 2,
+        name: "Dr. Sneha Patel",
+        designation: "Associate Professor",
+        department: "Information Technology",
+        email: "sneha.patel@jisuniversity.ac.in",
+      },
+      {
+        id: 3,
+        name: "Dr. Vikram Singh",
+        designation: "Professor",
+        department: "Mathematics",
+        email: "vikram.singh@jisuniversity.ac.in",
+      },
+    ],
+    progressReports: [
+      {
+        id: 1,
+        title: "Progress Report 1",
+        status: "Approved",
+        date: "15 Jan 2025",
+        document: "report_1.pdf",
+      },
+      {
+        id: 2,
+        title: "Progress Report 2",
+        status: "Approved",
+        date: "20 Mar 2025",
+        document: "report_2.pdf",
+      },
+      {
+        id: 3,
+        title: "Progress Report 3",
+        status: "Pending Review",
+        date: "12 May 2025",
+        document: "report_3.pdf",
+      },
+      {
+        id: 4,
+        title: "Progress Report 4",
+        status: "Not Submitted",
+        date: "",
+        document: "",
+      },
+      {
+        id: 5,
+        title: "Progress Report 5",
+        status: "Not Submitted",
+        date: "",
+        document: "",
+      },
+      {
+        id: 6,
+        title: "Progress Report 6",
+        status: "Not Submitted",
+        date: "",
+        document: "",
+      },
+    ],
+    researchSubmissions: [
+      {
+        id: "rp",
+        title: "Research Proposal",
+        status: "Approved",
+        date: "10 Oct 2024",
+        document: "research_proposal.pdf",
+      },
+      {
+        id: "pts",
+        title: "Pre-Thesis Submission",
+        status: "Not Submitted",
+        date: "",
+        document: "",
+      },
+      {
+        id: "fts",
+        title: "Final Thesis Submission",
+        status: "Not Submitted",
+        date: "",
+        document: "",
+      },
+    ],
+    forms: [
+      {
+        id: 1,
+        title: "Registration Form",
+        category: "Enrollment",
+        status: "Approved",
+        submittedDate: "05 Sep 2024",
+        document: "registration.pdf",
+      },
+      {
+        id: 2,
+        title: "Supervisor Nomination",
+        category: "Committee",
+        status: "Approved",
+        submittedDate: "20 Sep 2024",
+        document: "supervisor_nomination.pdf",
+      },
+      {
+        id: 3,
+        title: "Course Registration",
+        category: "Coursework",
+        status: "Approved",
+        submittedDate: "25 Sep 2024",
+        document: "course_registration.pdf",
+      },
+      {
+        id: 4,
+        title: "DSC Formation Request",
+        category: "Committee",
+        status: "Approved",
+        submittedDate: "01 Oct 2024",
+        document: "dsc_formation.pdf",
+      },
+      {
+        id: 5,
+        title: "Coursework Completion",
+        category: "Coursework",
+        status: "Pending Review",
+        submittedDate: "05 May 2025",
+        document: "coursework_completion.pdf",
+      },
+    ],
+  },
+  {
+    id: 2,
+    name: "Priya Patel",
+    department: "Electrical Engineering",
+    enrollmentNo: "PHD-EE-2023-005",
+    researchTopic: "Smart Grid Optimization using AI Techniques",
+    status: "Pre-submission Stage",
+    supervisor: {
+      name: "Dr. Rajesh Gupta",
+      email: "rajesh.gupta@jisuniversity.ac.in",
+    },
+    coSupervisor: {
+      name: "Dr. Harish Mehta",
+      email: "harish.mehta@jisuniversity.ac.in",
+    },
+    dscMembers: [
+      {
+        id: 1,
+        name: "Dr. Lakshmi Narayan",
+        designation: "Professor",
+        department: "Electrical Engineering",
+        email: "lakshmi.narayan@jisuniversity.ac.in",
+      },
+      {
+        id: 2,
+        name: "Dr. Amit Joshi",
+        designation: "Professor",
+        department: "Electronics",
+        email: "amit.joshi@jisuniversity.ac.in",
+      },
+      {
+        id: 3,
+        name: "Dr. Sunita Sharma",
+        designation: "Associate Professor",
+        department: "Computer Science",
+        email: "sunita.sharma@jisuniversity.ac.in",
+      },
+    ],
+    progressReports: [
+      {
+        id: 1,
+        title: "Progress Report 1",
+        status: "Approved",
+        date: "10 Jan 2025",
+        document: "report_1.pdf",
+      },
+      {
+        id: 2,
+        title: "Progress Report 2",
+        status: "Approved",
+        date: "05 Mar 2025",
+        document: "report_2.pdf",
+      },
+      {
+        id: 3,
+        title: "Progress Report 3",
+        status: "Approved",
+        date: "08 May 2025",
+        document: "report_3.pdf",
+      },
+      {
+        id: 4,
+        title: "Progress Report 4",
+        status: "Approved",
+        date: "12 Jul 2025",
+        document: "report_4.pdf",
+      },
+      {
+        id: 5,
+        title: "Progress Report 5",
+        status: "Approved",
+        date: "18 Sep 2025",
+        document: "report_5.pdf",
+      },
+      {
+        id: 6,
+        title: "Progress Report 6",
+        status: "Approved",
+        date: "22 Nov 2025",
+        document: "report_6.pdf",
+      },
+    ],
+    researchSubmissions: [
+      {
+        id: "rp",
+        title: "Research Proposal",
+        status: "Approved",
+        date: "15 Sep 2024",
+        document: "research_proposal.pdf",
+      },
+      {
+        id: "pts",
+        title: "Pre-Thesis Submission",
+        status: "Pending Review",
+        date: "01 May 2025",
+        document: "pre_thesis_submission.pdf",
+      },
+      {
+        id: "fts",
+        title: "Final Thesis Submission",
+        status: "Not Submitted",
+        date: "",
+        document: "",
+      },
+    ],
+    forms: [
+      {
+        id: 1,
+        title: "Registration Form",
+        category: "Enrollment",
+        status: "Approved",
+        submittedDate: "01 Sep 2024",
+        document: "registration.pdf",
+      },
+      {
+        id: 2,
+        title: "Supervisor Nomination",
+        category: "Committee",
+        status: "Approved",
+        submittedDate: "15 Sep 2024",
+        document: "supervisor_nomination.pdf",
+      },
+      {
+        id: 3,
+        title: "Course Registration",
+        category: "Coursework",
+        status: "Approved",
+        submittedDate: "20 Sep 2024",
+        document: "course_registration.pdf",
+      },
+      {
+        id: 4,
+        title: "DSC Formation Request",
+        category: "Committee",
+        status: "Approved",
+        submittedDate: "25 Sep 2024",
+        document: "dsc_formation.pdf",
+      },
+      {
+        id: 5,
+        title: "Coursework Completion",
+        category: "Coursework",
+        status: "Approved",
+        submittedDate: "15 Jan 2025",
+        document: "coursework_completion.pdf",
+      },
+      {
+        id: 6,
+        title: "Synopsis Presentation Request",
+        category: "Committee",
+        status: "Approved",
+        submittedDate: "20 Apr 2025",
+        document: "synopsis_request.pdf",
+      },
+    ],
+  },
+  {
+    id: 3,
+    name: "Amit Kumar",
+    department: "Mathematics",
+    enrollmentNo: "PHD-MTH-2024-003",
+    researchTopic:
+      "Computational Methods for Fractional Differential Equations",
+    status: "Research Proposal Pending",
+    supervisor: {
+      name: "Dr. Rajesh Gupta",
+      email: "rajesh.gupta@jisuniversity.ac.in",
+    },
+    coSupervisor: {
+      name: "Dr. Neha Agarwal",
+      email: "neha.agarwal@jisuniversity.ac.in",
+    },
+    dscMembers: [
+      {
+        id: 1,
+        name: "Dr. Rajiv Sharma",
+        designation: "Professor",
+        department: "Mathematics",
+        email: "rajiv.sharma@jisuniversity.ac.in",
+      },
+      {
+        id: 2,
+        name: "Dr. Meera Iyer",
+        designation: "Associate Professor",
+        department: "Physics",
+        email: "meera.iyer@jisuniversity.ac.in",
+      },
+      {
+        id: 3,
+        name: "Dr. Prakash Verma",
+        designation: "Professor",
+        department: "Statistics",
+        email: "prakash.verma@jisuniversity.ac.in",
+      },
+    ],
+    progressReports: [
+      {
+        id: 1,
+        title: "Progress Report 1",
+        status: "Not Submitted",
+        date: "",
+        document: "",
+      },
+      {
+        id: 2,
+        title: "Progress Report 2",
+        status: "Not Submitted",
+        date: "",
+        document: "",
+      },
+      {
+        id: 3,
+        title: "Progress Report 3",
+        status: "Not Submitted",
+        date: "",
+        document: "",
+      },
+      {
+        id: 4,
+        title: "Progress Report 4",
+        status: "Not Submitted",
+        date: "",
+        document: "",
+      },
+      {
+        id: 5,
+        title: "Progress Report 5",
+        status: "Not Submitted",
+        date: "",
+        document: "",
+      },
+      {
+        id: 6,
+        title: "Progress Report 6",
+        status: "Not Submitted",
+        date: "",
+        document: "",
+      },
+    ],
+    researchSubmissions: [
+      {
+        id: "rp",
+        title: "Research Proposal",
+        status: "Pending Review",
+        date: "05 May 2025",
+        document: "research_proposal.pdf",
+      },
+      {
+        id: "pts",
+        title: "Pre-Thesis Submission",
+        status: "Not Submitted",
+        date: "",
+        document: "",
+      },
+      {
+        id: "fts",
+        title: "Final Thesis Submission",
+        status: "Not Submitted",
+        date: "",
+        document: "",
+      },
+    ],
+    forms: [
+      {
+        id: 1,
+        title: "Registration Form",
+        category: "Enrollment",
+        status: "Approved",
+        submittedDate: "10 Apr 2025",
+        document: "registration.pdf",
+      },
+      {
+        id: 2,
+        title: "Supervisor Nomination",
+        category: "Committee",
+        status: "Approved",
+        submittedDate: "20 Apr 2025",
+        document: "supervisor_nomination.pdf",
+      },
+      {
+        id: 3,
+        title: "Course Registration",
+        category: "Coursework",
+        status: "Pending Review",
+        submittedDate: "01 May 2025",
+        document: "course_registration.pdf",
+      },
+      {
+        id: 4,
+        title: "DSC Formation Request",
+        category: "Committee",
+        status: "Pending Review",
+        submittedDate: "05 May 2025",
+        document: "dsc_formation.pdf",
+      },
+    ],
+  },
+];
 
 export default function SupervisorDashboard() {
-  const [scholars, setScholars] = useState<Scholar[] | null>(null);
   const [mounted, setMounted] = useState(false);
   const [selectedScholar, setSelectedScholar] = useState<Scholar | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
@@ -22,10 +517,6 @@ export default function SupervisorDashboard() {
 
   useEffect(() => {
     setMounted(true);
-    const fetchScholars = async()=>{
-
-    }
-    fetchScholars()
   }, []);
 
   if (!mounted) return null;
@@ -61,9 +552,7 @@ export default function SupervisorDashboard() {
     handleCloseModal();
   };
 
-  const renderScholarTable = () => (
-    <AssignedScholarsTable setSelectedScholar={setSelectedScholar} />
-  );
+  const renderScholarTable = () => <AssignedScholarsTable />;
 
   const renderScholarDetails = () => {
     if (!selectedScholar) return null;
@@ -92,7 +581,137 @@ export default function SupervisorDashboard() {
     );
 
     const renderOverview = () => (
-      <ScholarOverview selectedScholar={selectedScholar} />
+      <div className="space-y-6">
+        <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-4">
+          <h4 className="text-lg font-semibold text-gray-800 mb-3">
+            Scholar Information
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-gray-500">Name</p>
+              <p className="font-medium text-black">{selectedScholar.name}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Department</p>
+              <p className="font-medium text-black">
+                {selectedScholar.department}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Enrollment Number</p>
+              <p className="font-medium text-black">
+                {selectedScholar.enrollmentNo}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Current Status</p>
+              <p className="font-medium text-black">{selectedScholar.status}</p>
+            </div>
+            <div className="md:col-span-2">
+              <p className="text-sm text-gray-500">Research Topic</p>
+              <p className="font-medium text-black">
+                {selectedScholar.researchTopic}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <h4 className="text-md font-semibold text-gray-800 mb-3">
+              Supervisor Information
+            </h4>
+            <div>
+              <p className="text-sm text-gray-500">Name</p>
+              <p className="font-medium text-black">
+                {selectedScholar.supervisor.name}
+              </p>
+            </div>
+            <div className="mt-2">
+              <p className="text-sm text-gray-500">Email</p>
+              <p className="font-medium text-black">
+                {selectedScholar.supervisor.email}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <h4 className="text-md font-semibold text-gray-800 mb-3">
+              Co-Supervisor Information
+            </h4>
+            <div>
+              <p className="text-sm text-gray-500">Name</p>
+              <p className="font-medium text-black">
+                {selectedScholar.coSupervisor.name}
+              </p>
+            </div>
+            <div className="mt-2">
+              <p className="text-sm text-gray-500">Email</p>
+              <p className="font-medium text-black">
+                {selectedScholar.coSupervisor.email}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <h4 className="text-md font-semibold text-gray-800 mb-3">
+            Doctoral Scrutiny Committee (DSC)
+          </h4>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Name
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Designation
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Department
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Email
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {selectedScholar.dscMembers.map((member) => (
+                  <tr key={member.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="font-medium text-gray-900">
+                        {member.name}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                      {member.designation}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                      {member.department}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                      {member.email}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     );
 
     const renderSubmissions = () => (
@@ -932,6 +1551,38 @@ export default function SupervisorDashboard() {
       </div>
     );
 
+  // Render footer
+  const renderFooter = () => (
+    <footer className="bg-gray-100 py-4 mt-8">
+      <div className="container mx-auto px-4">
+        <div className="flex flex-col sm:flex-row justify-between items-center">
+          <p className="text-gray-600 text-sm mb-2 sm:mb-0">
+            © 2025 JIS University. All Rights Reserved.
+          </p>
+          <div className="flex space-x-4">
+            <a
+              href="#"
+              className="text-emerald-600 hover:text-emerald-800 text-sm"
+            >
+              Help Center
+            </a>
+            <a
+              href="#"
+              className="text-emerald-600 hover:text-emerald-800 text-sm"
+            >
+              Terms and Conditions
+            </a>
+            <a
+              href="#"
+              className="text-emerald-600 hover:text-emerald-800 text-sm"
+            >
+              Privacy Policy
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -968,9 +1619,12 @@ export default function SupervisorDashboard() {
       <main className="container mx-auto px-4 py-6">
         {selectedScholar ? renderScholarDetails() : renderScholarTable()}
         <div className="mt-6">
-          {scholars && <DSCSubmissions scholars={scholars} />}
+          <DSCSubmissions scholars={mockScholars} />
         </div>
       </main>
+
+      {/* Footer */}
+      {renderFooter()}
 
       {/* Modal */}
       {renderModal()}
@@ -978,3 +1632,5 @@ export default function SupervisorDashboard() {
   );
 }
 
+// push to dsc for evalution is not establish we can make a logic that if
+// approved by the supervisor and co-supervisor then it will be pushed to dsc for evaluation automatically
