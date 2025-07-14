@@ -1,6 +1,4 @@
-import { Form, ProgressReport } from "@/types/Document.js";
-import { ProgressReportStatus } from "@/types/Document.js";
-
+import { Form } from "@/types/Document.js";
 export const forms: Form[] = [
   {
     id: "1",
@@ -111,31 +109,3 @@ export const forms: Form[] = [
     filename: "credit_transfer_approval.pdf",
   },
 ];
-
-export const progressReports: ProgressReport[] = [
-  {
-    id: 1,
-    reportNumber: 1,
-    title: "Progress Report 1",
-    submittedOn: "2024-05-10",
-    status: ProgressReportStatus.Approved,
-    filename: "sample-1.pdf",
-  },
-  {
-    id: 2,
-    reportNumber: 2,
-    title: "Progress Report 2",
-    submittedOn: "2024-11-12",
-    status: ProgressReportStatus.Approved,
-    filename: "a8586d00919b8f36d319e6a5987696d8.pdf",
-  },
-  {
-    id: 3,
-    reportNumber: 3,
-    title: "Progress Report 3",
-    submittedOn: "2025-02-05",
-    status: ProgressReportStatus.PendingSupervisorApproval,
-    filename: "sample-1.pdf",
-  },
-];
-

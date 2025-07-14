@@ -1,57 +1,49 @@
 import { Request, Response } from "express";
 import { AcademicProfiles } from "@/test-data/phdscoller.js";
-import { AcademicProfile } from "@/types/AcademicProfile.js";
-import { progressReports } from "@/test-data/forms.js";
-import { ProgressReportStatus } from "@/types/Document.js";
-
-interface Scholar {
-  id: number;
-  name: string;
-  department: string;
-  enrollmentId: string;
-}
-
-export const assignedScholars: Scholar[] = [
-  {
-    id: 1,
-    name: "John Doe",
-    enrollmentId: "xyz-1234",
-    department: "Computer Science",
-  },
-];
+import {
+  ProgressReportStatus,
+  ProrgressReportStatusHumanReadable,
+} from "@/types/Document.js";
 
 export const getAssignedScholars = (req: Request, res: Response) => {
-  const { id: enrollmentId } = req.query;
-  if (!enrollmentId) {
-    if (!assignedScholars) {
-      return res.status(404).json({ message: "No Asigned Scholars Found" });
+  const { scholarId } = req.query;
+  if (scholarId) {
+    const scholar = AcademicProfiles.filter((e) => e.id === Number(scholarId));
+    if (!scholar) {
+      return res
+        .status(404)
+        .json({ message: "Scholar with that enrollmentId not found" });
     }
-
-    return res.status(200).json({ assignedScholars });
+    return res.status(200).json(scholar);
   }
-  const scholar = assignedScholars.find((e) => e.enrollmentId === enrollmentId);
-
-  if (!scholar) {
-    return res
-      .status(404)
-      .json({ message: "Scholar with that enrollmentId not found" });
-  }
-
-  const scholarDetails = AcademicProfiles.find(
-    (e) => e.enrollmentId === scholar.enrollmentId,
+  const scholarDetails = AcademicProfiles.filter(
+    (e) => e.supervisor.name === "Dr. Emily Smith",
   );
 
-  if (!scholarDetails) {
-    return res.status(404).json({ message: "Scholar details not found" });
-  }
+  const humanReadableScholarDetails = scholarDetails.map((e) => {
+    return {
+      ...e,
+      progressReports: e.progressReports.map((report) => {
+        return {
+          ...report,
+          status: ProrgressReportStatusHumanReadable[report.status],
+        };
+      }),
+    };
+  });
+  console.log(humanReadableScholarDetails);
 
-  return res.status(200).json({ ...scholarDetails });
+  return res
+    .status(200)
+    .json({ assignedScholars: humanReadableScholarDetails });
 };
 
 export const approveReport = (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const report = progressReports.find((e) => e.id === Number(id));
+  const report = AcademicProfiles[0].progressReports.find(
+    (e) => e.id === Number(id),
+  );
 
   if (!report) {
     return res.status(404).json({ message: "Report Not found" });
@@ -66,7 +58,9 @@ export const approveReport = (req: Request, res: Response) => {
 
 export const rejectReport = (req: Request, res: Response) => {
   const { id } = req.params;
-  const report = progressReports.find((e) => e.id === Number(id));
+  const report = AcademicProfiles[0].progressReports.find(
+    (e) => e.id === Number(id),
+  );
 
   if (!report) {
     return res.status(404).json({ message: "Report Not found" });

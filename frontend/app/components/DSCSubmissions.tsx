@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useEffect } from 'react';
+import { Scholar } from '../types/Scholar';
 
 // Define types for our data models
 interface Submission {
@@ -16,7 +17,8 @@ interface Submission {
 }
 
 interface DSCSubmissionsProps {
-  scholars: any[]; // Using the Scholar type from your existing code
+  scholars: Scholar[];
+
 }
 
 const DSCSubmissions = ({ scholars }: DSCSubmissionsProps) => {
@@ -67,7 +69,6 @@ const DSCSubmissions = ({ scholars }: DSCSubmissionsProps) => {
 
         // Add forms that are approved but not yet sent to DSC
         scholar.forms
-          .filter((form: { status: string; }) => form.status === 'Approved')
           .forEach((form: { id: any; title: any; category: any; submittedDate: any; document: any; }) => {
             submissions.push({
               id: `form-${scholar.id}-${form.id}`,
