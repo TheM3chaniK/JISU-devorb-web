@@ -3,17 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Card from "../components/Card";
 import StatusBadge from "../components/StatusBadge";
-
-export interface AcademicProfile {
-  id: number;
-  enrollmentId: string;
-  name: string;
-  department: string;
-  researchTopic: string;
-  supervisor: string;
-  coSupervisor?: string;
-  dscMembers: string[];
-}
+import { Scholar } from "../types/Scholar";
 
 interface Submission {
   id: number;
@@ -28,7 +18,7 @@ interface OverviewTabProps {
 }
 
 const OverviewTab: React.FC<OverviewTabProps> = ({ profileId }) => {
-  const [scholarData, setScholarData] = useState<AcademicProfile | null>(null);
+  const [scholarData, setScholarData] = useState<Scholar | null>(null);
 
   // Example static mock, replace with real fetch later if needed
   const submissionsData: Submission[] = [
@@ -86,12 +76,12 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ profileId }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h4 className="text-sm font-medium text-black">Supervisor</h4>
-              <p className="mt-1 text-black">{scholarData.supervisor}</p>
+              <p className="mt-1 text-black">{scholarData.supervisor.name}</p>
             </div>
             <div>
               <h4 className="text-sm font-medium text-black">Co-Supervisor</h4>
               <p className="mt-1 text-black">
-                {scholarData.coSupervisor || "Not Assigned"}
+                {scholarData.coSupervisor.name || "Not Assigned"}
               </p>
             </div>
           </div>
@@ -101,12 +91,11 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ profileId }) => {
       {/* DSC Members */}
       <Card title="DSC Members">
         <ul className="divide-y divide-gray-200">
-          {scholarData.dscMembers.map((member, index) => (
-            <li key={index} className="py-2 flex items-center">
+          {scholarData.dscMembers.map((member) => (
+            <li key={member.id} className="py-2 flex items-center">
               <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 mr-3">
-                {member.split(" ")[0][0]}
               </div>
-              <span className="text-black">{member}</span>
+              <span className="text-black">{member.name}</span>
             </li>
           ))}
         </ul>
@@ -172,4 +161,3 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ profileId }) => {
 };
 
 export default OverviewTab;
-
